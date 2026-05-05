@@ -23,20 +23,36 @@ def print_nametag(format_string, person):
 
 
 def fetch_website(urllib_version, url):
-    # Import the requested version (2 or 3) of urllib
-    exec(f"import urllib{urllib_version} as urllib", globals())
-    # Fetch and print the requested URL
- 
-    try: 
-        http = urllib.PoolManager()
-        r = http.request('GET', url)
-    except:
-        print('Exception')
+    """
+    Fetch a URL using a selected urllib variant.
+    Supports:
+      "2" -> urllib3 (PoolManager)
+      "3" -> urllib.request
+    """
+
+    try:
+        if urllib_version == "2":
+            import urllib3
+            http = urllib3.PoolManager()
+            response = http.request("GET", url)
+            return response.data
+
+        elif urllib_version == "3":
+            import urllib.request
+            with urllib.request.urlopen(url) as response:
+                return response.read()
+
+        else:
+            raise ValueError("Unsupported urllib version")
+
+    except Exception as e:
+        print(f"Exception: {e}")
+        return None
 
 
 def load_yaml(filename):
     stream = open(filename)
-    deserialized_data = yaml.load(stream, Loader=yaml.Loader) #deserializing data
+    deserialized_data = yaml.safe_load(stream, Loader=yaml.Loader) #deserializing data
     return deserialized_data
     
 def authenticate(password):
